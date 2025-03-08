@@ -13,50 +13,57 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration // Позначає клас як конфігураційний компонент Spring Security
-@EnableMethodSecurity //For roles
+@Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter; // Фільтр для обробки JWT-токенів
-    private final UserDetailsService userDetailsService; // Сервіс для отримання користувачів
+    private final UserDetailsService userDetailsService;
+
     @Autowired
-    // Конструктор класу, який отримує необхідні залежності через ін'єкцію
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, UserDetailsService userDetailsService) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
-    @Bean // Створює та повертає об'єкт для кодування паролів
+    @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Використовує алгоритм BCrypt для хешування паролів
+        return new BCryptPasswordEncoder();
     }
 
-    @Bean // Створює менеджер аутентифікації, який використовується для перевірки облікових даних користувача
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Bean // Налаштовує ланцюг безпеки для обробки HTTP-запитів
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Вимикає CSRF-захист (для REST API зазвичай не потрібен)
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login").permitAll() // Дозволяє доступ без аутентифікації до реєстрації та входу
-                        .requestMatchers("/products/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER") // Доступ до продуктів тільки для адміністраторів і менеджерів
-                        .anyRequest().authenticated() // Всі інші запити вимагають аутентифікації
+                        .requestMatchers("/auth/register", "/auth/login", "/css/**").permitAll()
+                        .requestMatchers("/products/save").hasRole("ADMIN") // Тільки адмін може додавати продукти
+                        .requestMatchers("/products/**").hasAnyRole("USER", "ADMIN") // Доступ до продуктів для USER і ADMIN
+                        .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Додає фільтр JWT перед стандартним фільтром аутентифікації
+                .formLogin(form -> form
+                        .loginPage("/auth/login")
+                        .defaultSuccessUrl("/products", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout")
+                        .permitAll()
+                );
 
-        return http.build(); // Будує конфігурацію безпеки
+        return http.build();
     }
 
-    @Bean // Створює та налаштовує провайдера аутентифікації
+    @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService); // Встановлює сервіс для отримання користувачів
-        authProvider.setPasswordEncoder(passwordEncoder()); // Встановлює кодувальник паролів
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 }

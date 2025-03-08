@@ -1,18 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ua" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Додати товар</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <h1>Save</h1>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main>
+    <h1>Додати товар</h1>
     <form th:action="@{/products/save}" th:object="${product}" method="post">
-        <input type="hidden" name="id" th:field="*{id}">
-        <label th:for="name">Name: <input name="name" type="text" th:field="*{name}"></label><br>
-        <label th:for="description">Description: <textarea name="description" cols="30" rows="10" th:field="*{description}"></textarea></label><br>
-        <label th:for="price">Price: <input type="text" name="price" th:field="*{price}"></label><br>
-        <label th:for="stock">Stock: <input type="text" name="stock" th:field="*{stock}"></label><br>
-        <button type="submit">save</button>
+        <div class="form-group">
+            <label>Назва:</label>
+            <input type="text" th:field="*{name}" required/>
+        </div>
+        <div class="form-group">
+            <label>Опис:</label>
+            <input type="text" th:field="*{description}"/>
+        </div>
+        <div class="form-group">
+            <label>Ціна:</label>
+            <input type="number" step="0.01" th:field="*{price}" required/>
+        </div>
+        <div class="form-group">
+            <label>Запас:</label>
+            <input type="number" th:field="*{stock}" required/>
+        </div>
+        <button type="submit">Зберегти</button>
     </form>
+    <a th:href="@{/products}">Назад до списку</a>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

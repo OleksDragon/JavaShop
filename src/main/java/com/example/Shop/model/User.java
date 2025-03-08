@@ -1,5 +1,6 @@
 package com.example.Shop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -38,6 +39,7 @@ public class User implements UserDetails {
     private String email;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<OrderDemo> orders;
 
     @ManyToMany(fetch = FetchType.EAGER)

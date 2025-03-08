@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ua" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="'Реєстрація'"></title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+<main>
+  <h1>Реєстрація</h1>
+  <form th:action="@{/auth/register}" th:object="${user}" method="post">
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+    <div class="form-group">
+      <label>Ім’я користувача:</label>
+      <input type="text" th:field="*{username}" required/>
+    </div>
+    <div class="form-group">
+      <label>Email:</label>
+      <input type="email" th:field="*{email}" required/>
+    </div>
+    <div class="form-group">
+      <label>Пароль:</label>
+      <input type="password" th:field="*{password}" required/>
+    </div>
+    <button type="submit">Зареєструватися</button>
+  </form>
+  <a th:href="@{/auth/login}">Вже маєте акаунт? Увійти</a>
+</main>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

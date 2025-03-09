@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/login", "/css/**").permitAll()
-                        .requestMatchers("/products/save").hasRole("ADMIN") // Тільки адмін може додавати продукти
+                        .requestMatchers("/products/save", "/products/update/**", "/products/delete/**").hasRole("ADMIN") // Тільки адмін може додавати продукти
                         .requestMatchers("/products/**").hasAnyRole("USER", "ADMIN") // Доступ до продуктів для USER і ADMIN
                         .anyRequest().authenticated()
                 )

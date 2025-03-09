@@ -2,6 +2,7 @@ package com.example.Shop.controller;
 
 import com.example.Shop.Service.ProductService;
 import com.example.Shop.model.Product;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +23,14 @@ public class ProductController {
         return "crud/read";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/save")
     public String showSaveForm(Model model) {
         model.addAttribute("product", new Product());
         return "crud/save";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/save")
     public String save(@ModelAttribute Product product) {
         productService.addProduct(product);
@@ -35,6 +38,7 @@ public class ProductController {
     }
 
     // Отображение формы редактирования
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/update/{id}")
     public String editProduct(@PathVariable Long id, Model model) {
         Product product = productService.getProductById(id);
@@ -43,6 +47,7 @@ public class ProductController {
     }
 
     // Обновление товара
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/update/{id}")
     public String updateProduct(@ModelAttribute Product product) {
         productService.updateProduct(product);
@@ -50,6 +55,7 @@ public class ProductController {
     }
 
     // Удаление товара
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/delete/{id}")
     public String deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);

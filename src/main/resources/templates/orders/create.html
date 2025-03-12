@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Створити замовлення</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main>
+    <h1>Створити нове замовлення</h1>
+    <form th:action="@{/orders/create}" th:object="${order}" method="post">
+        <div class="form-group">
+            <label>Товари в кошику:</label>
+            <div th:each="cartItem : ${cart}" class="product-item">
+                <p th:text="${cartItem.value.name + ' - ' + cartItem.value.price + ' грн (' + cartItem.value.stock + ' шт. в наявності)'}"></p>
+                <label th:for="'quantity_' + ${cartItem.key}">Кількість:</label>
+                <input type="number"
+                       th:id="'quantity_' + ${cartItem.key}"
+                       th:name="'quantities[' + ${cartItem.key} + ']'"
+                       min="1"
+                       th:max="${cartItem.value.stock}"
+                       value="1"
+                       class="form-control"
+                       style="width: 80px; display: inline-block;">
+            </div>
+            <div th:if="${cart.isEmpty()}">
+                <p>Кошик порожній</p>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success" th:disabled="${cart.isEmpty()}">Оформити замовлення</button>
+        <a th:href="@{/products}" class="btn btn-secondary">Повернутися до товарів</a>
+    </form>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

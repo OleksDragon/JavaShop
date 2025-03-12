@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ua" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Додати товар</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main>
+    <h1>Додати товар</h1>
+    <form th:action="@{/products/save}" th:object="${product}" method="post">
+        <div class="form-group">
+            <label>Назва:</label>
+            <input type="text" th:field="*{name}" required/>
+        </div>
+        <div class="form-group">
+            <label>Опис:</label>
+            <input type="text" th:field="*{description}"/>
+        </div>
+        <div class="form-group">
+            <label>Ціна:</label>
+            <input type="number" step="0.01" th:field="*{price}" required/>
+        </div>
+        <div class="form-group">
+            <label>Запас:</label>
+            <input type="number" th:field="*{stock}" required/>
+        </div>
+        <button type="submit">Зберегти</button>
+    </form>
+    <a th:href="@{/products}">Назад до списку</a>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

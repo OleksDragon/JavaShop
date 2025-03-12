@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ua" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Товари</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main>
+    <h1>Список товарів</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Назва</th>
+            <th>Опис</th>
+            <th>Ціна</th>
+            <th>Запас</th>
+            <th>Дії</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+            <td th:text="${product.id}"></td>
+            <td th:text="${product.name}"></td>
+            <td th:text="${product.description}"></td>
+            <td th:text="${product.price}"></td>
+            <td th:text="${product.stock}"></td>
+            <td>
+                <form th:action="@{/orders/addToCart/{id}(id=${product.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-primary">Додати до кошика</button>
+                </form>
+                <form sec:authorize="hasRole('ROLE_ADMIN')" th:action="@{/products/update/{id}(id=${product.id})}" method="get" style="display:inline;">
+                    <button type="submit" class="btn btn-primary">Редагувати</button>
+                </form>
+                <form sec:authorize="hasRole('ROLE_ADMIN')" th:action="@{/products/delete/{id}(id=${product.id})}" method="post" style="display:inline;">
+                    <input type="hidden" name="_method" value="delete" />
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Ви впевнені?')">Видалити</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div sec:authorize="hasRole('ROLE_ADMIN')">
+        <a th:href="@{/products/save}" class="btn btn-success">Додати товар</a>
+    </div>
+    <div>
+        <a th:href="@{/orders/create}" class="btn btn-info">Перейти до кошика</a>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

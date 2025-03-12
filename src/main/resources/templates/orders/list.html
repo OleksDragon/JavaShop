@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Список замовлень</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main>
+    <h1>Список усіх замовлень</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Користувач</th>
+            <th>Товари</th>
+            <th>Загальна сума</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.id}"></td>
+            <td th:text="${order.user.username}"></td>
+            <td>
+                <ul>
+                    <li th:each="item : ${order.ordersItems}"
+                        th:text="${item.product.name + ' - ' + item.quantity + ' шт. по ' + item.price + ' грн'}">
+                    </li>
+                    <li th:if="${order.ordersItems.isEmpty()}">Немає товарів</li>
+                </ul>
+            </td>
+            <td th:text="${order.total + ' грн'}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <a th:href="@{/products}" class="btn btn-primary">Повернутися до товарів</a>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

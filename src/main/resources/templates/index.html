@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ua" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Головна</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main>
+    <h1>Ласкаво просимо до магазину!</h1>
+    <p>Перегляньте наші товари: <a th:href="@{/products}">Товари</a></p>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

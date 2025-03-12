@@ -1,0 +1,27 @@
+
+<header th:fragment="navbar" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <nav class="navbar">
+    <div class="logo">
+      <a th:href="@{/products}">Магазин</a>
+    </div>
+    <ul class="nav-menu">
+      <li><a th:href="@{/products}">Товари</a></li>
+      <li sec:authorize="hasRole('ROLE_ADMIN')">
+        <a th:href="@{/products/save}">Додати товар</a>
+      </li>
+      <li sec:authorize="hasRole('ROLE_ADMIN')">
+        <a th:href="@{/orders}">Замовлення</a>
+      </li>
+      <li><a th:href="@{/orders/create}">Зробити замовлення</a></li>
+      <li sec:authorize="isAuthenticated()">
+        <a th:href="@{/auth/logout}">Вийти</a>
+      </li>
+      <li sec:authorize="isAnonymous()">
+        <a th:href="@{/auth/login}">Увійти</a>
+      </li>
+      <li sec:authorize="isAnonymous()">
+        <a th:href="@{/auth/register}">Зареєструватися</a>
+      </li>
+    </ul>
+  </nav>
+</header>

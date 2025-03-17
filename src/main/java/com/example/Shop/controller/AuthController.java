@@ -19,12 +19,16 @@ import java.util.Set;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
     private UserRepository userRepository;
-    @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+    }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {

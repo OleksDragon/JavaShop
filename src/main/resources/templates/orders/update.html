@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редагувати замовлення</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main>
+    <h1>Редагувати замовлення #<span th:text="${order?.id} ?: 'Невідомо'"></span></h1>
+    <form th:action="@{/orders/update/{id}(id=${order.id})}" th:object="${order}" method="post">
+        <!-- Поточні товари -->
+        <div class="form-group">
+            <label>Поточні товари в замовленні:</label>
+            <table>
+                <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Ціна за одиницю</th>
+                    <th>Кількість</th>
+                    <th>Дія</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item, itemStat : ${order.ordersItems}" th:class="${itemStat.count % 2 == 0} ? 'even' : 'odd'">
+                    <td th:text="${item.product.name}"></td>
+                    <td th:text="${item.price + ' грн'}"></td>
+                    <td>
+                        <input type="number"
+                               th:name="'quantities[' + ${item.product.id} + ']'"
+                               th:value="${item.quantity}"
+                               min="0"
+                               th:max="${item.product.stock + item.quantity}"
+                               class="form-control"
+                               style="width: 80px; display: inline-block;">
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-small"
+                                th:onclick="'removeItem(' + ${item.product.id} + ')'">Видалити</button>
+                    </td>
+                </tr>
+                <tr th:if="${order.ordersItems.isEmpty()}">
+                    <td colspan="4">Немає товарів у замовленні</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Доступні товари для додавання -->
+        <div class="form-group">
+            <label>Додати нові товари:</label>
+            <table>
+                <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Ціна за одиницю</th>
+                    <th>Запас</th>
+                    <th>Кількість</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product, prodStat : ${products}" th:class="${prodStat.count % 2 == 0} ? 'even' : 'odd'">
+                    <td th:text="${product.name}"></td>
+                    <td th:text="${product.price + ' грн'}"></td>
+                    <td th:text="${product.stock}"></td>
+                    <td>
+                        <input type="number"
+                               th:name="'quantities[' + ${product.id} + ']'"
+                               value="0"
+                               min="0"
+                               th:max="${product.stock}"
+                               class="form-control"
+                               style="width: 80px; display: inline-block;"
+                               th:disabled="${#lists.contains(order.ordersItems.![product.id], product.id)}">
+                    </td>
+                </tr>
+                <tr th:if="${products.isEmpty()}">
+                    <td colspan="4">Немає доступних товарів</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="btn btn-success">Зберегти зміни</button>
+        <a th:href="@{/orders}" class="btn btn-secondary">Скасувати</a>
+    </form>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    function removeItem(productId) {
+        var input = document.getElementsByName('quantities[' + productId + ']')[0];
+        if (input) {
+            input.value = 0;
+            input.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

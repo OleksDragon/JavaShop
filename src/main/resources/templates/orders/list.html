@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Список замовлень</title>
@@ -16,6 +16,7 @@
             <th>Користувач</th>
             <th>Товари</th>
             <th>Загальна сума</th>
+            <th>Дії</th>
         </tr>
         </thead>
         <tbody>
@@ -31,10 +32,20 @@
                 </ul>
             </td>
             <td th:text="${order.total + ' грн'}"></td>
+            <td>
+                <div sec:authorize="hasRole('ROLE_ADMIN')">
+                    <form th:action="@{/orders/update/{id}(id=${order.id})}" method="get" style="display:inline;">
+                        <button type="submit" class="btn btn-primary">Редагувати</button>
+                    </form>
+                    <form th:action="@{/orders/delete/{id}(id=${order.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Ви впевнені?')">Видалити</button>
+                    </form>
+                </div>
+            </td>
         </tr>
         </tbody>
     </table>
-    <a th:href="@{/products}" class="btn btn-primary">Повернутися до товарів</a>
+    <a th:href="@{/products}" class="btn btn-secondary">Повернутися до товарів</a>
 </main>
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>

@@ -19,7 +19,7 @@ public class OrderDemo {
     @ManyToOne
     @JsonBackReference
     private User user;
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<OrderItem> ordersItems;
     @PositiveOrZero

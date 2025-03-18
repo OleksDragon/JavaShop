@@ -6,7 +6,9 @@ import com.example.Shop.model.Product;
 import com.example.Shop.model.User;
 import com.example.Shop.repository.OrderDemoRepository;
 import com.example.Shop.repository.OrderItemRepository;
+import com.example.Shop.repository.ProductRepository;
 import com.example.Shop.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductService productService;
     private final UserRepository userRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Autowired
     public OrderService(OrderDemoRepository orderRepository,
@@ -96,5 +101,81 @@ public class OrderService {
             System.out.println("Order ID: " + order.getId() + ", Items count: " + order.getOrdersItems().size());
         });
         return orders;
+    }
+
+    public OrderDemo getOrderById(Long id) {
+        return orderRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public void updateOrder(Long orderId, Map<Long, Integer> quantities) {
+        OrderDemo order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        // Відновлюємо запаси для старих товарів перед зміною
+        for (OrderItem item : new ArrayList<>(order.getOrdersItems())) {
+            Product product = item.getProduct();
+            product.setStock(product.getStock() + item.getQuantity());
+            productRepository.save(product);
+            orderItemRepository.delete(item); // Видаляємо старі OrderItem із бази
+        }
+        order.getOrdersItems().clear(); // Очищаємо список у пам’яті
+
+        // Додаємо оновлені товари та перераховуємо total
+        List<OrderItem> updatedItems = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Map.Entry<Long, Integer> entry : quantities.entrySet()) {
+            Long productId = entry.getKey();
+            Integer newQuantity = entry.getValue();
+
+            if (newQuantity == null || newQuantity < 0) {
+                continue; // Пропускаємо товари з некоректною кількістю
+            }
+
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + productId));
+            int availableStock = product.getStock();
+
+            if (newQuantity > availableStock) {
+                throw new IllegalArgumentException("Not enough stock for product ID: " + productId +
+                        ", required: " + newQuantity + ", available: " + availableStock);
+            }
+
+            if (newQuantity > 0) {
+                OrderItem item = order.getOrdersItems().stream()
+                        .filter(i -> i.getProduct().getId() == productId)
+                        .findFirst()
+                        .orElse(new OrderItem()); // Якщо товар уже є, беремо його, інакше створюємо новий
+
+                item.setOrder(order);
+                item.setProduct(product);
+                item.setQuantity(newQuantity);
+                item.setPrice(product.getPrice());
+
+                updatedItems.add(item);
+                total = total.add(product.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
+                product.setStock(availableStock - newQuantity); // Оновлюємо запаси
+                productRepository.save(product);
+            }
+        }
+
+        // Оновлюємо список товарів і загальну суму
+        order.getOrdersItems().clear();
+        order.getOrdersItems().addAll(updatedItems);
+        order.setTotal(total);
+        orderRepository.save(order);
+    }
+
+    public void deleteOrder(Long id) {
+        OrderDemo order = orderRepository.findById(id).orElse(null);
+        if (order != null) {
+            for (OrderItem item : order.getOrdersItems()) {
+                Product product = item.getProduct();
+                product.setStock(product.getStock() + item.getQuantity());
+                productRepository.save(product);
+            }
+            orderRepository.delete(order);
+        }
     }
 }
